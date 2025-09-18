@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author John-xueshi
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -106,6 +106,56 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+    public static boolean emptySpaceExistsInside(Board b) {
+//        int size = b.size();
+        for(int i = 0; i < b.size(); i++){
+            for (int j = 1; j < b.size(); j++){
+                if(b.tile(i, j) == null){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean adjacentExitsInside(Board b){
+        int size = b.size();
+        int pre;
+        int cur;
+        for(int row = 0; row < size; row++) {
+            pre = b.tile(0, row).value();
+            for (int i = 1; i < size; i++) {
+                if (b.tile(i, row) == null) {
+                    continue;
+                } else {
+                    cur = b.tile(i, row).value();
+                    if (cur == pre) {
+                        return true;
+                    }
+                    pre = cur;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean atLeastOneMoveExistsInside(Board b){
+        if(emptySpaceExistsInside(b)){
+            return true;
+        }else return adjacentExitsInside(b);
+    }
+
+    public int FindEndindex(int a, int col, Board b){
+        int endindex = a;
+        while (this.board.tile(col, endindex) == null ){
+            if(endindex == 0){
+                break;
+            }
+            endindex--;
+        }
+        return endindex;
+    }
+
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -113,11 +163,68 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        this.board.setViewingPerspective(side);
+        int size = this.board.size();
+        Tile pre;
+        Tile cur;
+        if(atLeastOneMoveExistsInside(this.board)) {
+            // for merge
+            for (int col = 0; col < size; col++){
+                int endindex = FindEndindex(size - 1, col, this.board);
+                if(endindex == 0){
+                    continue;
+                }
+                pre = this.board.tile(col, endindex);
+                for (int row = endindex - 1; row >= 0; row--){
+                    cur = this.board.tile(col, row);
+                    if(cur == null){
+                        continue;
+                    }
+                    if(cur.value()== pre.value()){
+                        int score = this.board.tile(col, row).value();
+                        score += this.board.tile(col, endindex).value();
+                        pre = this.board.tile(col, endindex);
+                        if(this.board.move(col, endindex, this.board.tile(col, row))){
+                            this.score += score;
+                            changed = true;
+                        }
+                        if (row == size-1 || endindex <= 0 || row == 0){
+                            break;
+                        }
+                            row --;
+                            endindex = FindEndindex(row, col, this.board);
+                    }
+                    else{
+                        pre = this.board.tile(col, row);
+                    }
+                }
+            }
+            // for swift
+            Tile now;
+            for (int col = 0; col < size; col++){
+                int endindex = size - 1;
+                    // choose where we start
+                    while (this.board.tile(col, endindex) != null && endindex > 0){
+                        endindex--;
+                    }
+                    if(endindex == 0){
+                        continue;
+                    }
+                for (int row = endindex-1; row >= 0; row--){
+                    now = this.board.tile(col, row);
+                    if (now != null){
+                        this.board.move(col, endindex, now);
+                        changed = true;
+                        endindex = row;
+                    }
+                }
+            }
+        }
         checkGameOver();
         if (changed) {
             setChanged();
         }
+        board.setViewingPerspective(Side.NORTH);
         return changed;
     }
 
@@ -138,6 +245,15 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+//        int size = b.size();
+        for(int i = 0; i < b.size(); i++){
+            for (int j = 0; j < b.size(); j++){
+                if(b.tile(i, j) == null){
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -148,6 +264,17 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int size = b.size();
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                if(b.tile(i, j) == null){
+                    continue;
+                }
+                if( b.tile(i, j).value() == MAX_PIECE){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -157,9 +284,38 @@ public class Model extends Observable {
      * 1. There is at least one empty space on the board.
      * 2. There are two adjacent tiles with the same value.
      */
+    public static boolean adjacentExits(Board b){
+        int size = b.size();
+        int pre;
+        int cur;
+        for(int col = 0; col < size; col++){
+            pre = b.tile(col, 0).value();
+            for(int i = 1; i < size; i++){
+                cur = b.tile(col, i).value();
+                if(cur == pre){
+                    return true;
+                }
+                pre = cur;
+            }
+        }
+        for(int row = 0; row < size; row++){
+            pre = b.tile(0, row).value();
+            for(int i = 1; i < size; i++){
+                cur = b.tile(i, row).value();
+                if(cur == pre){
+                    return true;
+                }
+                pre = cur;
+            }
+        }
+        return false;
+    }
+
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        if(emptySpaceExists(b)){
+            return true;
+        }else return adjacentExits(b);
     }
 
 
