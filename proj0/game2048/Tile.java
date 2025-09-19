@@ -63,7 +63,7 @@ public class Tile {
             return 0;
         } else {
             return Math.max(Math.abs(row - next.row()),
-                            Math.abs(col - next.col()));
+                    Math.abs(col - next.col()));
         }
     }
 

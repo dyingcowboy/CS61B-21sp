@@ -106,125 +106,72 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
-    public static boolean emptySpaceExistsInside(Board b) {
-//        int size = b.size();
-        for(int i = 0; i < b.size(); i++){
-            for (int j = 1; j < b.size(); j++){
-                if(b.tile(i, j) == null){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean adjacentExitsInside(Board b){
-        int size = b.size();
-        int pre;
-        int cur;
-        for(int row = 0; row < size; row++) {
-            pre = b.tile(0, row).value();
-            for (int i = 1; i < size; i++) {
-                if (b.tile(i, row) == null) {
-                    continue;
-                } else {
-                    cur = b.tile(i, row).value();
-                    if (cur == pre) {
-                        return true;
-                    }
-                    pre = cur;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean atLeastOneMoveExistsInside(Board b){
-        if(emptySpaceExistsInside(b)){
-            return true;
-        }else return adjacentExitsInside(b);
-    }
-
-    public int FindEndindex(int a, int col, Board b){
-        int endindex = a;
-        while (this.board.tile(col, endindex) == null ){
-            if(endindex == 0){
-                break;
-            }
-            endindex--;
-        }
-        return endindex;
-    }
 
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
 
-        // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
-        this.board.setViewingPerspective(side);
-        int size = this.board.size();
-        Tile pre;
-        Tile cur;
-        if(atLeastOneMoveExistsInside(this.board)) {
-            // for merge
-            for (int col = 0; col < size; col++){
-                int endindex = FindEndindex(size - 1, col, this.board);
-                if(endindex == 0){
-                    continue;
+        // Set the viewing perspective so we can treat all tilts as "up".
+        board.setViewingPerspective(side);
+        int size = board.size();
+
+        // Iterate through each column, processing tiles from top to bottom.
+        for (int col = 0; col < size; col++) {
+            // targetRow is the next available empty row for a tile to move to or merge with.
+            // It starts at the top of the column.
+            int targetRow = size - 1;
+            // The tile at targetRow that we might merge with.
+            Tile targetTile = null;
+
+            // Iterate from the top row downwards.
+
+            for (int row = size - 1; row >= 0; row--) {
+                Tile currentTile = board.tile(col, row);
+
+                if (currentTile == null) {
+                    continue; // Skip empty spaces.
                 }
-                pre = this.board.tile(col, endindex);
-                for (int row = endindex - 1; row >= 0; row--){
-                    cur = this.board.tile(col, row);
-                    if(cur == null){
-                        continue;
-                    }
-                    if(cur.value()== pre.value()){
-                        int score = this.board.tile(col, row).value();
-                        score += this.board.tile(col, endindex).value();
-                        pre = this.board.tile(col, endindex);
-                        if(this.board.move(col, endindex, this.board.tile(col, row))){
-                            this.score += score;
-                            changed = true;
-                        }
-                        if (row == size-1 || endindex <= 0 || row == 0){
-                            break;
-                        }
-                            row --;
-                            endindex = FindEndindex(row, col, this.board);
-                    }
-                    else{
-                        pre = this.board.tile(col, row);
-                    }
-                }
-            }
-            // for swift
-            Tile now;
-            for (int col = 0; col < size; col++){
-                int endindex = size - 1;
-                    // choose where we start
-                    while (this.board.tile(col, endindex) != null && endindex > 0){
-                        endindex--;
-                    }
-                    if(endindex == 0){
-                        continue;
-                    }
-                for (int row = endindex-1; row >= 0; row--){
-                    now = this.board.tile(col, row);
-                    if (now != null){
-                        this.board.move(col, endindex, now);
+
+                if (targetTile == null) {
+                    // This is the first non-empty tile we've seen from the top.
+                    // Move it to the highest position.
+                    targetTile = currentTile;
+                    if (row != targetRow) {
+                        board.move(col, targetRow, currentTile);
                         changed = true;
-                        endindex = row;
+                    }
+                } else if (targetTile.value() == currentTile.value()) {
+                    // The current tile can merge with the target tile.
+                    // Perform the merge by moving the current tile to the target position.
+                    boolean merged = board.move(col, targetRow, currentTile);
+                    if (merged) {
+                        this.score += targetTile.value() * 2;
+                        changed = true;
+                    }
+                    // After a merge, the target spot is now "used".
+                    // The next tile will go below it, and we need a new tile to merge with.
+                    targetRow--;
+                    targetTile = null;
+                } else {
+                    // The tiles can't merge. Move the current tile to the row below the target.
+                    // The target row is now filled by a new, non-merging tile.
+                    targetRow--;
+                    targetTile = currentTile;
+                    if (row != targetRow) {
+                        board.move(col, targetRow, currentTile);
+                        changed = true;
                     }
                 }
             }
         }
+
+        // Reset the viewing perspective back to North.
+        board.setViewingPerspective(Side.NORTH);
+
         checkGameOver();
         if (changed) {
             setChanged();
         }
-        board.setViewingPerspective(Side.NORTH);
         return changed;
     }
 
