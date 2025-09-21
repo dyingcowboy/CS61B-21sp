@@ -116,52 +116,45 @@ public class Model extends Observable {
         int size = board.size();
 
         // Iterate through each column, processing tiles from top to bottom.
-        for (int col = 0; col < size; col++) {
-            // targetRow is the next available empty row for a tile to move to or merge with.
-            // It starts at the top of the column.
+        for(int col = 0; col < size; col ++){
             int targetRow = size - 1;
-            // The tile at targetRow that we might merge with.
             Tile targetTile = null;
-
-            // Iterate from the top row downwards.
-
-            for (int row = size - 1; row >= 0; row--) {
+            for(int row = size - 1; row >= 0; row --){
                 Tile currentTile = board.tile(col, row);
-
-                if (currentTile == null) {
-                    continue; // Skip empty spaces.
+                if(currentTile == null){
+                    continue;
                 }
+                // meet the first and top valid Tile in state
 
-                if (targetTile == null) {
-                    // This is the first non-empty tile we've seen from the top.
-                    // Move it to the highest position.
-                    targetTile = currentTile;
-                    if (row != targetRow) {
+                // swift to the null: targetTile swifts to the current
+                if (targetTile == null){
+                    if(row != targetRow){
                         board.move(col, targetRow, currentTile);
                         changed = true;
                     }
-                } else if (targetTile.value() == currentTile.value()) {
-                    // The current tile can merge with the target tile.
-                    // Perform the merge by moving the current tile to the target position.
+                    // if row == targetRow do the initialization for targetTile
+                    targetTile = currentTile;
+                }
+                // merged: and targetedTile moves below one row
+                else if(targetTile.value() == currentTile.value()){
                     boolean merged = board.move(col, targetRow, currentTile);
-                    if (merged) {
-                        this.score += targetTile.value() * 2;
+                    if(merged){
+                        score += 2*targetTile.value();
                         changed = true;
                     }
-                    // After a merge, the target spot is now "used".
-                    // The next tile will go below it, and we need a new tile to merge with.
-                    targetRow--;
+                    targetRow --;
                     targetTile = null;
-                } else {
-                    // The tiles can't merge. Move the current tile to the row below the target.
-                    // The target row is now filled by a new, non-merging tile.
-                    targetRow--;
+                }
+                else {
+                    // not the same value, targetTiel bounds to the current Tile and targetRow moves below and do the swift
                     targetTile = currentTile;
-                    if (row != targetRow) {
+                    targetRow --;
+                    if(row != targetRow){
                         board.move(col, targetRow, currentTile);
                         changed = true;
                     }
                 }
+
             }
         }
 
