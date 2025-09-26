@@ -1,4 +1,5 @@
 package timingtest;
+
 import edu.princeton.cs.algs4.Stopwatch;
 
 /**
@@ -7,7 +8,7 @@ import edu.princeton.cs.algs4.Stopwatch;
 public class TimeAList {
     private static void printTimingTable(AList<Integer> Ns, AList<Double> times, AList<Integer> opCounts) {
         System.out.printf("%12s %12s %12s %12s\n", "N", "time (s)", "# ops", "microsec/op");
-        System.out.printf("------------------------------------------------------------\n");
+        System.out.print("------------------------------------------------------------\n");
         for (int i = 0; i < Ns.size(); i += 1) {
             int N = Ns.get(i);
             double time = times.get(i);
@@ -22,32 +23,24 @@ public class TimeAList {
     }
 
     public static void timeAListConstruction() {
-        AList<Integer> Ns1 = new AList<>();
-        // 添加要测试的不同大小
-        Ns1.addLast(1000);
-        Ns1.addLast(2000);
-        Ns1.addLast(4000);
-        Ns1.addLast(8000);
-        Ns1.addLast(16000);
-        Ns1.addLast(32000);
-        Ns1.addLast(64000);
-        Ns1.addLast(128000);
-
-        AList<Double> times = new AList<>();
-
-        for(int i = 0; i < Ns1.size(); i ++) {
-            int num = Ns1.get(i);
-            Stopwatch sw = new Stopwatch(); // 创建计时器
-
-            AList<Integer> testList = new AList<>();
-            for(int j = 0; j < num; j++){ // 修正循环条件，确保添加num个元素
-                testList.addLast(j);
-            }
-
-            double timeinseconds = sw.elapsedTime(); // 记录耗时
-            times.addLast(timeinseconds);
+        System.out.println("Timing table for addLast");
+        AList<Integer> Ns = new AList<>();
+        int x = 1000;
+        for (int i = 1; i <= 8; i+=1) {
+            Ns.addLast(x);
+            x*=2;
         }
-
-        printTimingTable(Ns1, times, Ns1);
+        AList<Double> times = new AList<>();
+        for (int i = 0; i < Ns.size(); i += 1) {
+            int n = Ns.get(i);
+            AList<Integer> a = new AList<>();
+            Stopwatch sw = new Stopwatch();
+            for (int j = 0; j < n; j += 1) {
+                a.addLast(114514);
+            }
+            double time = sw.elapsedTime();
+            times.addLast(time);
+        }
+        printTimingTable(Ns, times, Ns);
     }
 }
