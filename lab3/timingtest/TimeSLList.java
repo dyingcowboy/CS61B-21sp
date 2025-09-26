@@ -22,35 +22,41 @@ public class TimeSLList {
     }
 
     public static void timeGetLast() {
-        // TODO: YOUR CODE HERE
-        AList<Integer> Ns1 = new AList<>();
-        Ns1.addLast(1000);
-        Ns1.addLast(2000);
-        Ns1.addLast(4000);
-        Ns1.addLast(8000);
-        Ns1.addLast(16000);
-        Ns1.addLast(32000);
-        Ns1.addLast(64000);
-        Ns1.addLast(128000);
-        AList<Integer> ops = new AList<>();
-        for(int i = 0; i < 8;i++){
-            ops.addLast(10000);
-        }
-        AList<Double> times = new AList<>();
-        SLList<Integer> Ns = new SLList<>();
-        for(int i = 0; i < 8; i ++) {
-            int num = Ns1.get(i);
-            for(int j = 0; j <= num; j++){
-                Ns.addLast(j);
-            }
-            Stopwatch sw = new Stopwatch();
-            for(int j = 0;j <= 10000;j++){
-                Ns.getLast();
-            }
-            double timeinseconds = sw.elapsedTime();
-            times.addLast(timeinseconds);
-        }
-        printTimingTable(Ns1, times, ops);
-    }
+        AList<Integer> Ns = new AList<>();
+        // 添加要测试的不同大小
+        Ns.addLast(1000);
+        Ns.addLast(2000);
+        Ns.addLast(4000);
+        Ns.addLast(8000);
+        Ns.addLast(16000);
+        Ns.addLast(32000);
+        Ns.addLast(64000);
+        Ns.addLast(128000);
 
+        int operationCount = 10000; // 每个测试执行10000次getLast操作
+        AList<Integer> opCounts = new AList<>();
+        AList<Double> times = new AList<>();
+
+        for (int i = 0; i < Ns.size(); i++) {
+            int size = Ns.get(i);
+
+            // 为每个测试创建新的SLList
+            SLList<Integer> list = new SLList<>();
+            for (int j = 0; j < size; j++) { // 修正循环条件
+                list.addLast(j);
+            }
+
+            // 计时开始
+            Stopwatch sw = new Stopwatch();
+            for (int j = 0; j < operationCount; j++) { // 修正循环条件
+                list.getLast();
+            }
+            double elapsed = sw.elapsedTime();
+
+            times.addLast(elapsed);
+            opCounts.addLast(operationCount);
+        }
+
+        printTimingTable(Ns, times, opCounts);
+    }
 }
