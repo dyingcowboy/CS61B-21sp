@@ -102,6 +102,12 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
         return helpGet(sentinel.next, index);
     }
+    public void printDeque(){
+        for(int i = 0; i< size(); i++){
+            System.out.print(get(i) + " ");
+        }
+        System.out.println();
+    }
 
     // 改为private，避免外部调用
     private T helpGet(Node p, int index) {

@@ -78,10 +78,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return size;
     }
 
-    public boolean isEmpty(){
-        return size == 0;
-    }
-
     public T get(int index){
         if (index < 0 || index >= size){
             return null;
@@ -106,6 +102,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         nextFirst = capacity - 1;
         items = o;
         maxsize = capacity;
+    }
+    public void printDeque(){
+        for(int i = 0; i< size(); i++){
+            System.out.print(get(i) + " ");
+        }
+        System.out.println();
     }
 
     public Iterator<T> iterator(){
