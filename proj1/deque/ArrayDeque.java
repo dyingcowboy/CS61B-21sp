@@ -6,9 +6,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private int size;
     private T[] items;
-    int maxsize;
-    int nextFirst = 4;
-    int nextLast = 5;
+    private int maxsize;
+    private int nextFirst = 4;
+    private int nextLast = 5;
 
     private int plusOne(int index){
         return (index + 1) % maxsize;
@@ -89,7 +89,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return items[itemIndex];
     }
 
-    public void resize(int capacity){
+    private void resize(int capacity){
         T[] o = (T[]) new Object[capacity];
         int i = 0;
         int index = plusOne(nextFirst);
@@ -113,7 +113,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public Iterator<T> iterator(){
         return new ArrayIterator();
     }
-    public class ArrayIterator implements Iterator<T>{
+    private class ArrayIterator implements Iterator<T>{
         private int wizPos;
         private int iterated;
         private int initialSize;
@@ -138,6 +138,37 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             iterated++;
             return item;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        // 1. Check if the object is the same instance
+        if (this == o) {
+            return true;
+        }
+
+        // 2. Check if the object is null or not of a compatible type (Deque)
+        if (o == null || !(o instanceof Deque)) {
+            return false;
+        }
+
+        // 3. Cast the object to a Deque
+        Deque<T> other = (Deque<T>) o;
+
+        // 4. Check if the sizes are the same
+        if (this.size() != other.size()) {
+            return false;
+        }
+
+        // 5. Check if all elements are equal and in the same order
+        for (int i = 0; i < size(); i++) {
+            if (!this.get(i).equals(other.get(i))) {
+                return false;
+            }
+        }
+
+        // If all checks pass, the deques are equal
+        return true;
     }
 
 }
